@@ -19,16 +19,19 @@ import java.util.List;
  * *** This is generally NOT the case in most programming languages!!! ***
  */
 public enum Token {
-    ARTICLE("a", "the"),
-    CONJUNCTION("and", "or"),
-    NOUN("dog", "cat", "rat", "house", "tree"),
-    VERB("loves", "hates", "eats", "chases", "stalks"),
-    ADJECTIVE("fast", "slow", "furry", "sneaky", "lazy", "tall"),
-    ADJ_SEP(","),
-    ADVERB("quickly", "secretly", "silently"),
-    PREPOSITION("of", "on", "around", "with", "up"),
-    PERIOD("."),
-
+  
+    WRITE("write"),
+    READ("read"),
+    ELSE("else"),
+    FI("fi"),
+    IF("if"),
+    UNTIL("until"),
+    OD("od"),
+    DO("do"),
+    WHILE("while"),
+    LEFTP("("),
+    RIGHTP(")"),
+    ASSIGNMENT(":="),
     ADD_OP("+", "-"),
     MULT_OP("*", "/"),
     RELATION("<",">","<=",">=", "=", "!="),

@@ -4,33 +4,19 @@ package compiler;
 import java.util.logging.Logger;
 
 /*
- * GRAMMAR FOR PROCESSING SIMPLE SENTENCES:
- *
- * <SENTENCE> ::= <NOUN_PHRASE> <VERB_PHRASE> <NOUN_PHRASE> <PREP_PHRASE> <SENTENCE_TAIL> $$
- * <SENTENCE_TAIL> ::= <CONJ> <SENTENCE> | <EOS>
- *
- * <NOUN_PHRASE> ::= <ART> <ADJ_LIST> <NOUN>
- * <ADJ_LIST> ::= <ADJECTIVE> <ADJ_TAIL> | <<EMPTY>>
- * <ADJ_TAIL> ::= <COMMA> <ADJECTIVE> <ADJ_TAIL> | <<EMPTY>>
- *
- * <VERB_PHRASE> ::= <ADVERB> <VERB> | <VERB>
- * <PREP_PHRASE> ::= <PREPOSITION> <NOUN_PHRASE> | <<EMPTY>>
- *
- * // *** Terminal Productions (Actual terminals omitted, but they are just the
- * valid words in the language). ***
- *
- * <COMMA> ::= ','
- * <EOS> ::= '.' | '!'
- *
- * <ADJECTIVE> ::= ...adjective list...
- * <ADVERB> ::= ...adverb list...
- * <ART> ::= ...article list...
- * <CONJ> ::= ...conjunction list...
- * <NOUN> ::= ...noun list...
- * <PREPOSITION> ::= ...preposition list...
- * <VERB> ::= ...verb list....
- */
-
+    <PROGRAM> ::= <STMT_LIST> $$   
+    <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY> 
+    <STMT> ::= <ID> := <EXPR> | read <ID> | write <EXPR> | <WHILE_STMT> | <DO_STMT> | <IF_STMT>    
+    <EXPR> ::= <TERM> <TERM_TAIL>  
+    <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY>  
+    <TERM> ::= <FACTOR> <FACTOR_TAIL>
+    <FACTOR_TAIL> ::= <MULT_OP> <FACTOR> <FACTOR_TAIL> | <EMPTY> 
+    <FACTOR> ::= ( <EXPR> ) | <ID> | <NUMBER> 
+    <CONDITION> ::= <EXPR> <RELATION> <EXPR> 
+    <WHILE_STATEMENT> ::= <WHILE> <CONDITION> <DO> <STMT_LIST> <OD> 
+    <DO_STATEMENT> ::= <DO> <STMT_LIST> <UNTIL> <CONDITION>
+    <IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <ELSE> <STMT_lIST>  <FI>
+*/
 /**
  * The Syntax Analyzer.
  * <p>
@@ -96,205 +82,173 @@ public class Parser {
         this.SENTENCE(parentNode);
     }
 
-    // <PROGRAM> ::= <STMT_LIST> $$
+    // <PROGRAM> ::= <STMT_LIST> $$   
+
     private void PROGRAM(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-            this.MATCH(thisNode, Token.STMT_LIST);
+            this.STMT_LIST(thisNode);
         // Test for the end of input.
         if (lexer.currentToken() != Token.$$) {
             this.raiseException(Token.$$, thisNode);
         }
     }
-
-    // <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY>
+    
+  //######## Confused ############
+    //###############################
+    //How do I know when to do the recursive call or the empty??
+    // <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY> 
     private void STMT_LIST(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
+
+
+        this.STMT(thisNode);
+
+
         if (lexer.currentToken() == Token.STMT) {
-            this.MATCH(thisNode, Token.STMT);
-            this.STMT_LIST(thisNode)
+            this.MATCH(thisNode,Token.STMT_LIST);
         }else{
             this.EMPTY(thisNode);
         }
     }
 
-
-    //######## Confused ############
-    //###############################
-    // <STMT> ::= <ID> := <EXPR> | read <ID> | write <EXPR>
+    // <STMT> ::= <ID> := <EXPR> | read <ID> | write <EXPR> | <WHILE_STMT> | <DO_STMT> | <IF_STMT>    
     private void STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        if (lexer.currentToken() == Token.ID) {
-            this.MATCH(thisNode, Token.STMT);
+        if (lexer.currentToken() == Token.UNKNOWN) {
+            this.MATCH(thisNode, Token.UNKNOWN);
+            this.MATCH(thisNode, Token.ASSIGNMENT);
+            this.EXPR(thisNode);
 
-        }else{
-            this.EMPTY(thisNode);
+        }else if(lexer.currentToken() == Token.READ){
+            this.MATCH(thisNode, Token.READ);
+            this.MATCH(thisNode, Token.UNKNOWN);
+        }else if(lexer.currentToken() == Token.WRITE){{
+            this.MATCH(thisNode, Token.WRITE);
+            this.EXPR(thisNode);
+        }else if(lexer.currentToken() == Token.WHILE){
+            this.WHILE_STMT(thisNode);
+        }else if(lexer.currentToken() == Token.IF){
+            this.IF_STMT(thisNode);
+        }else if(lexer.currentToken() == Token.DO){
+            this.DO_STMT(thisNode);
         }
     }
 
-    // <EXPR> ::= <TERM> <TERM_TAIL> 
+    // <EXPR> ::= <TERM> <TERM_TAIL>  
     private void EXPR(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        this.MATCH(thisNode, Token.TERM);
-        this.MATCH(thisNode, Token.TERM_TAIL);
+        this.TERM(thisNode);
+        this.TERM_TAIL(thisNode);
     }
 
-    // <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY> 
+     //######## Confused ############
+    //###############################
+
+    // <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY>  
     private void TERM_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        
-        if(lexer.currentToken() == Token.ADD_OP){
             this.MATCH(thisNode, Token.ADD_OP);
-            this.MATCH(thisNode, Token.TERM);
-            this.MATCH(thisNode, Token.TERM_TAIL);
-        }else{
-            this.EMPTY(thisNode);
-        }
+            this.TERM(thisNode);
+
+
+        // if(lexer.currentToken() == Token.ADD_OP){
+        //     this.TERM_TAIL(thisNode);
+        // }else{
+        //     this.EMPTY(thisNode);
+        // }
     }
 
-    // <TERM> ::= <FACTOR> <FACTOR_TAIL> 
+    // <TERM> ::= <FACTOR> <FACTOR_TAIL>
+   
     private void TERM(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        this.MATCH(thisNode, Token.FACTOR);
-        this.MATCH(thisNode, Token.FACTOR_TAIL);
+        this.FACTOR(thisNode);
+        this.FACTOR_TAIL(thisNode);
     }
 
+
+ //######## Confused ############
+    //###############################
     // <FACTOR_TAIL> ::= <MULT_OP> <FACTOR> <FACTOR_TAIL> | <EMPTY> 
+    
     private void FACTOR_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        
-        if(lexer.currentToken() == Token.MULT_OP){
             this.MATCH(thisNode, Token.MULT_OP);
-            this.MATCH(thisNode, Token.FACTOR);
-            this.MATCH(thisNode, Token.FACTOR_TAIL);
-        }else{
-            this.EMPTY(thisNode);
-        }
+            this.FACTOR(thisNode);
+        // if(lexer.currentToken() == Token.MULT_OP){
+        //     this.MATCH(thisNode, Token.FACTOR_TAIL);
+        // }else{
+        //     this.EMPTY(thisNode);
+        // }
     }
 
-    //####### Confused ###############
-    //##############################
 
-    // <FACTOR> ::= ( <EXPR> ) | <ID> | <NUMBER>
+
+    // <FACTOR> ::= ( <EXPR> ) | <ID> | <NUMBER> 
     private void TERM(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        
-        // if(lexer.currentToken() == )
-        // this.MATCH(thisNode, Token.FACTOR);
-        // this.MATCH(thisNode, Token.FACTOR_TAIL);
+  
+        if(lexer.currentToken() == Token.LEFTP){
+           this.MATCH(thisNode, Token.LEFTP); 
+           this.EXPR(thisNode); 
+           this.MATCH(thisNode, Token.RIGHTP); 
+        }else if(lexer.currentToken() == Token.UNKNOWN){
+            this.MATCH(thisNode, Token.UNKNOWN);
+        }else{
+            this.MATCH(thisNode, Token.NUMBER);
+        }
+
     }
-    // <CONDITION> ::= <EXPR> <RELATION> <EXPR>
+
+    // <CONDITION> ::= <EXPR> <RELATION> <EXPR> 
     private void CONDITION(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        this.MATCH(thisNode, Token.EXPR);
+        this.EXPR(thisNode);
         this.MATCH(thisNode, Token.RELATION);
-        this.MATCH(thisNode, Token.EXPR);
+        this.EXPR(thisNode);
     }
-
-    // <WHILE_STATEMENT> ::= <CONDITION> <DO> <OD>
-    // <DO> ::= "DO" <STMT_LIST> <DO_TAIL>
-    // <DO_TAIL> ::= <UNTIL> | <EMPYY>
-    // <UNTIL> ::= "UNTIL" <CONDITION>
-
-    //<IF> ::= "IF" <CONDITION> <THEN> <FI>
-    //<THEN> ::= "THEN" <STMT_LIST> <ELSE>
-    //<ELSE> ::= ("ELSE" <STMT_LIST>)| <EMPTY> 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // <SENTENCE> ::= <NOUN_PHRASE> <VERB_PHRASE> <NOUN_PHRASE> <PREP_PHRASE> <SENTENCE_TAIL> $$
-    private void SENTENCE(final TreeNode parentNode) throws ParseException {
+    
+    // <WHILE_STATEMENT> ::= <WHILE> <CONDITION> <DO> <STMT_LIST <OD> 
+    private void WHILE_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
-        this.NOUN_PHRASE(thisNode);
-        this.VERB_PHRASE(thisNode);
-        this.NOUN_PHRASE(thisNode);
-        this.PREP_PHRASE(thisNode);
-        this.SENTENCE_TAIL(thisNode);
-
-        // Test for the end of input.
-        if (lexer.currentToken() != Token.$$) {
-            this.raiseException(Token.$$, thisNode);
-        }
+        this.MATCH(thisNode, Token.WHILE);
+        this.CONDITION(thisNode);
+        this.MATCH(thisNode, Token.DO);
+        this.STMT_LIST(thisNode);
+        this.MATCH(thisNode, Token.OD);
     }
 
-    // <SENTENCE_TAIL> ::= <CONJ> <SENTENCE> | <EOS>
-    private void SENTENCE_TAIL(final TreeNode parentNode) throws ParseException {
+
+
+   
+    // <DO_STATEMENT> ::= <DO> <STMT_LIST> <UNTIL> <CONDITION>
+    private void DO_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
-        if (lexer.currentToken() == Token.CONJUNCTION) {
-            this.MATCH(thisNode, Token.CONJUNCTION);
-            this.SENTENCE(thisNode);
-        } else {
-            this.MATCH(thisNode, Token.PERIOD);
-        }
+        this.MATCH(thisNode, Token.DO);
+        this.STMT_LIST(thisNode);
+        this.MATCH(thisNode, Token.UNTIL);
+        this.CONDITION(thisNode);
     }
 
-    // <NOUN_PHRASE> ::= <ART> <ADJ_LIST> <NOUN>
-    private void NOUN_PHRASE(final TreeNode parentNode) throws ParseException {
+
+
+    //<IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <ELSE> <STMT_lIST>  <FI>
+    private void IF_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
-        this.MATCH(thisNode, Token.ARTICLE);
-        this.ADJ_LIST(thisNode);
-        this.MATCH(thisNode, Token.NOUN);
+        this.MATCH(thisNode, Token.IF);
+        this.CONDITION(thisNode);
+        this.MATCH(thisNode, Token.THEN);
+        this.STMT_LIST(thisNode);
+        this.MATCH(thisNode, Token.ELSE);
+        this.STMT_LIST(thisNode);
+        this.MATCH(thisNode, Token.FI);
+        
     }
 
-    // <ADJ_LIST> ::= <ADJECTIVE> <ADJ_TAIL> | <<EMPTY>>
-    private void ADJ_LIST(final TreeNode parentNode) throws ParseException {
-        final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
-        if (lexer.currentToken() == Token.ADJECTIVE) {
-            this.MATCH(thisNode, Token.ADJECTIVE);
-            this.ADJ_TAIL(thisNode);
-        } else {
-            this.EMPTY(thisNode);
-        }
-    }
-
-    // <ADJ_TAIL> ::= <COMMA> <ADJECTIVE> <ADJ_TAIL> | <<EMPTY>>
-    private void ADJ_TAIL(final TreeNode parentNode) throws ParseException {
-        final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-
-        if (lexer.currentToken() == Token.ADJ_SEP) {
-            this.MATCH(thisNode, Token.ADJ_SEP);
-            this.MATCH(thisNode, Token.ADJECTIVE);
-            this.ADJ_TAIL(thisNode);
-        } else {
-            this.EMPTY(thisNode);
-        }
-    }
-
-    // <VERB_PHRASE> ::= <ADVERB> <VERB> | <VERB>
-    private void VERB_PHRASE(final TreeNode parentNode) throws ParseException {
-        final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-
-        if (lexer.currentToken() == Token.ADVERB) {
-            this.MATCH(thisNode, Token.ADVERB);
-        }
-
-        this.MATCH(thisNode, Token.VERB);
-    }
-
-    // <PREP_PHRASE> ::= <PREPOSITION> <NOUN_PHRASE> | <<EMPTY>>
-    private void PREP_PHRASE(final TreeNode parentNode) throws ParseException {
-        final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-
-        if (lexer.currentToken() == Token.PREPOSITION) {
-            this.MATCH(thisNode, Token.PREPOSITION);
-            this.NOUN_PHRASE(thisNode);
-        } else {
-            this.EMPTY(thisNode);
-        }
-    }
 
     /////////////////////////////////////////////////////////////////////////////////////
 
