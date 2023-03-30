@@ -1,6 +1,8 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
 
+import compiler.src.*;
+
 import java.util.logging.Logger;
 
 /*
@@ -41,7 +43,8 @@ public class Parser {
         this.lexer = lexer;
         this.codeGenerator = codeGenerator;
 
-        // Change this to automatically prompt to see the Open WebGraphViz dialog or not.
+        // Change this to automatically prompt to see the Open WebGraphViz dialog or
+        // not.
         MAIN.PROMPT_FOR_GRAPHVIZ = true;
     }
 
@@ -71,7 +74,8 @@ public class Parser {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * This is just an intermediate method to make it easy to change the start rule of the grammar.
+     * This is just an intermediate method to make it easy to change the start rule
+     * of the grammar.
      *
      * @param parentNode The parent node for the parse tree
      * @throws ParseException If there is a syntax error
@@ -82,41 +86,43 @@ public class Parser {
         this.SENTENCE(parentNode);
     }
 
-    // <PROGRAM> ::= <STMT_LIST> $$   
+    // <PROGRAM> ::= <STMT_LIST> $$
 
     private void PROGRAM(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-            this.STMT_LIST(thisNode);
+        this.STMT_LIST(thisNode);
         // Test for the end of input.
         if (lexer.currentToken() != Token.$$) {
             this.raiseException(Token.$$, thisNode);
         }
     }
-    
 
-    //How do I know when to do the recursive call or the empty??
-    // <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY> 
+    // How do I know when to do the recursive call or the empty??
+    // <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY>
     private void STMT_LIST(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
         this.STMT(thisNode);
 
-        //These are the FIRST(STMT_LIST)
-        List <Token> stmtFirstList = new List<>(){{
-            add(Token.UNKNOWN);
-            add(Token.READ);
-            add(Token.WRITE);
-            add(Token.WHILE);
-            add(Token.DO);
-            add(Token.IF);
-        }};
+        // These are the FIRST(STMT_LIST)
+        List<Token> stmtFirstList = new List<>() {
+            {
+                add(Token.UNKNOWN);
+                add(Token.READ);
+                add(Token.WRITE);
+                add(Token.WHILE);
+                add(Token.DO);
+                add(Token.IF);
+            }
+        };
         if (stmtFirstList.contains(lexer.currentToken())) {
-            this.MATCH(thisNode,Token.STMT_LIST);
-        }else{
+            this.MATCH(thisNode, Token.STMT_LIST);
+        } else {
             this.EMPTY(thisNode);
         }
     }
 
-    // <STMT> ::= <ID> := <EXPR> | read <ID> | write <EXPR> | <WHILE_STMT> | <DO_STMT> | <IF_STMT>    
+    // <STMT> ::= <ID> := <EXPR> | read <ID> | write <EXPR> | <WHILE_STMT> |
+    // <DO_STMT> | <IF_STMT>
     private void STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
         if (lexer.currentToken() == Token.UNKNOWN) {
@@ -124,40 +130,38 @@ public class Parser {
             this.MATCH(thisNode, Token.ASSIGNMENT);
             this.EXPR(thisNode);
 
-        }else if(lexer.currentToken() == Token.READ){
+        } else if (lexer.currentToken() == Token.READ) {
             this.MATCH(thisNode, Token.READ);
             this.MATCH(thisNode, Token.UNKNOWN);
-        }else if(lexer.currentToken() == Token.WRITE){{
+        } else if (lexer.currentToken() == Token.WRITE) {
             this.MATCH(thisNode, Token.WRITE);
             this.EXPR(thisNode);
-        }else if(lexer.currentToken() == Token.WHILE){
+        } else if (lexer.currentToken() == Token.WHILE) {
             this.WHILE_STMT(thisNode);
-        }else if(lexer.currentToken() == Token.IF){
+        } else if (lexer.currentToken() == Token.IF) {
             this.IF_STMT(thisNode);
-        }else if(lexer.currentToken() == Token.DO){
+        } else if (lexer.currentToken() == Token.DO) {
             this.DO_STMT(thisNode);
         }
     }
 
-    // <EXPR> ::= <TERM> <TERM_TAIL>  
+    // <EXPR> ::= <TERM> <TERM_TAIL>
     private void EXPR(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
         this.TERM(thisNode);
         this.TERM_TAIL(thisNode);
     }
 
-     
-
-    // <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY>  
+    // <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY>
     private void TERM_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-            this.MATCH(thisNode, Token.ADD_OP);
-            this.TERM(thisNode);
+        this.MATCH(thisNode, Token.ADD_OP);
+        this.TERM(thisNode);
 
-    //recursive or empty
-        if(lexer.currentToken() == Token.ADD_OP){
+        // recursive or empty
+        if (lexer.currentToken() == Token.ADD_OP) {
             this.TERM_TAIL(thisNode);
-        }else{
+        } else {
             this.EMPTY(thisNode);
         }
     }
@@ -169,49 +173,45 @@ public class Parser {
         this.FACTOR_TAIL(thisNode);
     }
 
-
-
-    // <FACTOR_TAIL> ::= <MULT_OP> <FACTOR> <FACTOR_TAIL> | <EMPTY> 
+    // <FACTOR_TAIL> ::= <MULT_OP> <FACTOR> <FACTOR_TAIL> | <EMPTY>
     private void FACTOR_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-            this.MATCH(thisNode, Token.MULT_OP);
-            this.FACTOR(thisNode);
+        this.MATCH(thisNode, Token.MULT_OP);
+        this.FACTOR(thisNode);
 
-        //Recursive or empty
-        if(lexer.currentToken() == Token.MULT_OP){
+        // Recursive or empty
+        if (lexer.currentToken() == Token.MULT_OP) {
             this.MATCH(thisNode, Token.FACTOR_TAIL);
-        }else{
+        } else {
             this.EMPTY(thisNode);
         }
     }
 
-
-
-    // <FACTOR> ::= ( <EXPR> ) | <ID> | <NUMBER> 
+    // <FACTOR> ::= ( <EXPR> ) | <ID> | <NUMBER>
     private void FACTOR(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-  
-        if(lexer.currentToken() == Token.LEFTP){
-           this.MATCH(thisNode, Token.LEFTP); 
-           this.EXPR(thisNode); 
-           this.MATCH(thisNode, Token.RIGHTP); 
-        }else if(lexer.currentToken() == Token.UNKNOWN){
+
+        if (lexer.currentToken() == Token.LEFTP) {
+            this.MATCH(thisNode, Token.LEFTP);
+            this.EXPR(thisNode);
+            this.MATCH(thisNode, Token.RIGHTP);
+        } else if (lexer.currentToken() == Token.UNKNOWN) {
             this.MATCH(thisNode, Token.UNKNOWN);
-        }else{
+        } else {
             this.MATCH(thisNode, Token.NUMBER);
         }
 
     }
 
-    // <CONDITION> ::= <EXPR> <RELATION> <EXPR> 
+    // <CONDITION> ::= <EXPR> <RELATION> <EXPR>
     private void CONDITION(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
         this.EXPR(thisNode);
         this.MATCH(thisNode, Token.RELATION);
         this.EXPR(thisNode);
     }
-    
-    // <WHILE_STATEMENT> ::= <WHILE> <CONDITION> <DO> <STMT_LIST <OD> 
+
+    // <WHILE_STATEMENT> ::= <WHILE> <CONDITION> <DO> <STMT_LIST <OD>
     private void WHILE_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
@@ -222,9 +222,6 @@ public class Parser {
         this.MATCH(thisNode, Token.OD);
     }
 
-
-
-   
     // <DO_STATEMENT> ::= <DO> <STMT_LIST> <UNTIL> <CONDITION>
     private void DO_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
@@ -235,9 +232,7 @@ public class Parser {
         this.CONDITION(thisNode);
     }
 
-
-
-    //<IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <ELSE> <STMT_lIST>  <FI>
+    // <IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <ELSE> <STMT_lIST> <FI>
     private void IF_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
@@ -248,15 +243,14 @@ public class Parser {
         this.MATCH(thisNode, Token.ELSE);
         this.STMT_LIST(thisNode);
         this.MATCH(thisNode, Token.FI);
-        
+
     }
-
-
 
     /////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Add a an EMPTY terminal node (result of an Epsilon Production) to the parse tree.
+     * Add a an EMPTY terminal node (result of an Epsilon Production) to the parse
+     * tree.
      * Mainly, this is just done for better visualizing the complete parse tree.
      *
      * @param parentNode The parent of the terminal node.
@@ -285,7 +279,6 @@ public class Parser {
         }
     }
 
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -294,9 +287,11 @@ public class Parser {
      * @param parentNode    The parent of the terminal node.
      * @param currentToken  The token to be added.
      * @param currentLexeme The lexeme of the token beign added.
-     * @throws ParseException Throws a ParseException if the token cannot be added to the tree.
+     * @throws ParseException Throws a ParseException if the token cannot be added
+     *                        to the tree.
      */
-    void addTerminalToTree(final TreeNode parentNode, final Token currentToken, final String currentLexeme) throws ParseException {
+    void addTerminalToTree(final TreeNode parentNode, final Token currentToken, final String currentLexeme)
+            throws ParseException {
         var nodeLabel = "<%s>".formatted(currentToken);
         var terminalNode = codeGenerator.addNonTerminalToTree(parentNode, nodeLabel);
 
@@ -304,7 +299,8 @@ public class Parser {
     }
 
     /**
-     * Raise a ParseException if the input cannot be parsed as defined by the grammar.
+     * Raise a ParseException if the input cannot be parsed as defined by the
+     * grammar.
      *
      * @param expected   The expected token
      * @param parentNode The token's parent node

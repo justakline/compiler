@@ -1,6 +1,8 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
 
+import compiler.Token;
+import compiler.src.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -26,12 +28,16 @@ import static java.text.MessageFormat.format;
  * <p>
  * ************** NOTE: REQUIRES JAVA 17 OR ABOVE! ******************
  * <p>
- * DESIGN NOTE: It's generally bad to have a bunch of "top level classes" in one giant file.
- * However, this was done here only to keep the example down to only files... One for the parser and
+ * DESIGN NOTE: It's generally bad to have a bunch of "top level classes" in one
+ * giant file.
+ * However, this was done here only to keep the example down to only files...
+ * One for the parser and
  * one for everything else!
  * <p>
- * This syntax analyzer implements a top-down, left-to-right, recursive-descent parser based on the
- * production rules for a simple English language provided by Weber in "Modern Programming
+ * This syntax analyzer implements a top-down, left-to-right, recursive-descent
+ * parser based on the
+ * production rules for a simple English language provided by Weber in "Modern
+ * Programming
  * Languages".
  */
 public class MAIN {
@@ -44,8 +50,7 @@ public class MAIN {
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         // Check for an input file argument
         System.out.println("here");
         if (args.length != 1) {
@@ -92,11 +97,15 @@ public class MAIN {
 /**
  * This is a *FAKE* (Overly simplified) Lexical Analyzer...
  * <p>
- * NOTE: This DOES NOT "lex" the input in the traditional manner on a DFA based "state machine".
+ * NOTE: This DOES NOT "lex" the input in the traditional manner on a DFA based
+ * "state machine".
  * <p>
- * Instead of using "state transitions", this is merely a quick hack to create a something that
- * BEHAVES like a traditional lexer in its FUNCTIONALITY, but it ONLY knows how to separate
- * (tokenize) lexemes delimited by SPACES. A Real Lexer would tokenize based upon far more
+ * Instead of using "state transitions", this is merely a quick hack to create a
+ * something that
+ * BEHAVES like a traditional lexer in its FUNCTIONALITY, but it ONLY knows how
+ * to separate
+ * (tokenize) lexemes delimited by SPACES. A Real Lexer would tokenize based
+ * upon far more
  * sophisticated lexical rules.
  * <p>
  * AGAIN: ALL TOKENS MUST BE [space|tab|CR|LF] DELIMITED.
@@ -116,7 +125,8 @@ class LexicalAnalyzer {
     }
 
     /**
-     * Construct a Lexer over the contents of a file. Filters out lines starting with a '#' Symbol.
+     * Construct a Lexer over the contents of a file. Filters out lines starting
+     * with a '#' Symbol.
      * Removes EOL markers; otherwise, our grammar would have to deal with them.
      *
      * @param inputFile The file to read from.
@@ -145,7 +155,8 @@ class LexicalAnalyzer {
 
     /**
      * Method to return the current lexeme.
-     * If the tokenList is empty or the current token is $$, the function will return "EOF".
+     * If the tokenList is empty or the current token is $$, the function will
+     * return "EOF".
      *
      * @return the Lexeme as an Optional string since an empty list has no tokens.
      */
@@ -203,21 +214,27 @@ class LexicalAnalyzer {
 
 // *********************************************************************************************************
 
-
 /**
- * This is a ***SIMULATION*** of a "code generator" that simply generates GraphViz output.
+ * This is a ***SIMULATION*** of a "code generator" that simply generates
+ * GraphViz output.
  * Technically, this would represent the "Intermediate Code Generation" step.
  * <p>
- * Also, Instead of building an entire tree in memory followed by a traversal the tree at the end,
+ * Also, Instead of building an entire tree in memory followed by a traversal
+ * the tree at the end,
  * here we are just adding "code" as we go.
  * <p>
- * (This simulates a single-pass compiler; keep in mind that most modern compilers work in several
- * passes... eg. Scan for all top level identifiers, build subtrees for each class/method/etc.,
+ * (This simulates a single-pass compiler; keep in mind that most modern
+ * compilers work in several
+ * passes... eg. Scan for all top level identifiers, build subtrees for each
+ * class/method/etc.,
  * generate an internal intermediate code representation, and so on).
  * <p>
- * DESIGN NOTE: From an OOP design perspective, creating instances of "utility classes" (classes
- * with no internal state) is generally bad. However, in a more elaborate example, the code
- * generator would most certainly maintain some internal state information. (Memory address offsets,
+ * DESIGN NOTE: From an OOP design perspective, creating instances of "utility
+ * classes" (classes
+ * with no internal state) is generally bad. However, in a more elaborate
+ * example, the code
+ * generator would most certainly maintain some internal state information.
+ * (Memory address offsets,
  * etc.)
  */
 class CodeGenerator {
@@ -247,17 +264,22 @@ class CodeGenerator {
     /**
      * Add an "inner node" to the parse tree.
      * <p>
-     * The following code employs a bit of a trick to automatically build the calling method name.
-     * The "getStackTrace()" method returns information about the entire active stack. Element[0] is
-     * the actual "getStackTrace()" method (it doesn't eliminate itself from the array), element[1]
-     * is THIS method (since we called "getStackTrace()") and element[2] is the method that called
+     * The following code employs a bit of a trick to automatically build the
+     * calling method name.
+     * The "getStackTrace()" method returns information about the entire active
+     * stack. Element[0] is
+     * the actual "getStackTrace()" method (it doesn't eliminate itself from the
+     * array), element[1]
+     * is THIS method (since we called "getStackTrace()") and element[2] is the
+     * method that called
      * us, etc.
      *
      * @param parentNode the parent of the node being added to the tree
      * @return the newly added node as ParseNode object.
      */
     public TreeNode addNonTerminalToTree(final TreeNode parentNode) {
-        // This uses a Java "Trick" to return the name of the function that called this method.
+        // This uses a Java "Trick" to return the name of the function that called this
+        // method.
         final var fromMethodName = Thread
                 .currentThread()
                 .getStackTrace()[2]
@@ -280,7 +302,8 @@ class CodeGenerator {
      * @return the child node
      */
     public TreeNode addNonTerminalToTree(final TreeNode fromNode, final TreeNode toNode) {
-        final var msg = String.format("\t\"%s\" -> {\"%s\" [label=\"%s\", shape=rect]};%n", fromNode, toNode, toNode.getNodeName());
+        final var msg = String.format("\t\"%s\" -> {\"%s\" [label=\"%s\", shape=rect]};%n", fromNode, toNode,
+                toNode.getNodeName());
 
         this.outputGeneratedCode(msg);
         return toNode;
@@ -300,7 +323,8 @@ class CodeGenerator {
     // Show the terminals as ovals...
     public void addEmptyToTree(final TreeNode fromNode) {
         final var node = new TreeNode("EMPTY");
-        final var msg = String.format("\t\"%s\" -> {\"%s\" [label=\"%s\", shape=none]};%n", fromNode, node, "&epsilon;");
+        final var msg = String.format("\t\"%s\" -> {\"%s\" [label=\"%s\", shape=none]};%n", fromNode, node,
+                "&epsilon;");
 
         this.outputGeneratedCode(msg);
     }
@@ -318,7 +342,7 @@ class CodeGenerator {
         return new TreeNode(name);
     }
 
-    // "Real" executable code generally has a header.  See:
+    // "Real" executable code generally has a header. See:
     // https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
     // (There are some good diagrams at the link)
     public void writeHeader(TreeNode node) {
@@ -391,22 +415,24 @@ class GraphViewer {
     /**
      * To open a browser window...
      * <p>
-     * FEEL FREE TO IGNORE THIS!!! It's just for opening the default browser, if desired.
+     * FEEL FREE TO IGNORE THIS!!! It's just for opening the default browser, if
+     * desired.
      */
     static void openWebGraphViz(final String graph) {
-        /* Online/Web versions of Graphviz
-         http://www.webgraphviz.com
-         http://viz-js.com
-         https://dreampuf.github.io/GraphvizOnline
+        /*
+         * Online/Web versions of Graphviz
+         * http://www.webgraphviz.com
+         * http://viz-js.com
+         * https://dreampuf.github.io/GraphvizOnline
          */
         final var WEBGRAPHVIZ_HOME = "https://dreampuf.github.io/GraphvizOnline/";
 
-        final var MSG =
-                ("To visualize the output you may Copy/Paste the parser output into:%n" +
-                 "%s%n" +
-                 "(or any other online graphviz tool)").formatted(WEBGRAPHVIZ_HOME);
+        final var MSG = ("To visualize the output you may Copy/Paste the parser output into:%n" +
+                "%s%n" +
+                "(or any other online graphviz tool)").formatted(WEBGRAPHVIZ_HOME);
 
-        // For some reason, the URL encoder always uses "+" instead of "%20" for spaces...which are not always accepted.
+        // For some reason, the URL encoder always uses "+" instead of "%20" for
+        // spaces...which are not always accepted.
         String encodedURL = URLEncoder.encode(graph, StandardCharsets.UTF_8).replace("+", "%20");
 
         // URI Length limit reached.
@@ -422,8 +448,8 @@ class GraphViewer {
             // Try to set the default skin
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                     UnsupportedLookAndFeelException e) {
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                    | UnsupportedLookAndFeelException e) {
                 // Ignore the error, but notify.
                 System.out.println("Using Default Skin");
             }
@@ -435,12 +461,11 @@ class GraphViewer {
 
                 // Can we launch a browser?
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                    final var response =
-                            JOptionPane.showConfirmDialog(
-                                    null,
-                                    String.format("%s%n%nOpen %s?", MSG, WEBGRAPHVIZ_HOME),
-                                    "Open Web Graphviz Page",
-                                    JOptionPane.YES_NO_OPTION);
+                    final var response = JOptionPane.showConfirmDialog(
+                            null,
+                            String.format("%s%n%nOpen %s?", MSG, WEBGRAPHVIZ_HOME),
+                            "Open Web Graphviz Page",
+                            JOptionPane.YES_NO_OPTION);
 
                     // Open Browser?
                     if (response == JOptionPane.YES_OPTION) {
@@ -451,7 +476,8 @@ class GraphViewer {
                 }
             } catch (IOException | URISyntaxException ex) {
                 java.util.logging.Logger.getAnonymousLogger()
-                        .log(java.util.logging.Level.WARNING, "Could not open browser (URL \"GET\" May be too long!!!)", ex);
+                        .log(java.util.logging.Level.WARNING, "Could not open browser (URL \"GET\" May be too long!!!)",
+                                ex);
             }
         }
     }
@@ -460,7 +486,8 @@ class GraphViewer {
 // *********************************************************************************************************
 
 /**
- * An exception to be raised if parsing fails due to a "syntax error" in the input file.
+ * An exception to be raised if parsing fails due to a "syntax error" in the
+ * input file.
  */
 final class ParseException extends RuntimeException implements Serializable {
 

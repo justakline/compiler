@@ -1,25 +1,32 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
 
+import compiler.src.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Remember this is part of a "fake" tokenizer, that when handed a string, it simply resolves to a
- * TOKEN object matching that string. All the Tokens/Terminals Used by the parser. The purpose of
+ * Remember this is part of a "fake" tokenizer, that when handed a string, it
+ * simply resolves to a
+ * TOKEN object matching that string. All the Tokens/Terminals Used by the
+ * parser. The purpose of
  * the enum type here is to eliminate the need for direct character comparisons.
  * <p>
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<br>
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<br>
  * -----------------------------------------------------------------------------<br>
  * IN *MOST* REAL CASES, THERE WILL BE ONLY ONE LEXEME PER compiler Token!
  * <p>
- * The fact that several lexemes exist per token in this example is because this is to parse simple
- * In English sentences, most of the token types have many words (lexemes) that could fit.
+ * The fact that several lexemes exist per token in this example is because this
+ * is to parse simple
+ * In English sentences, most of the token types have many words (lexemes) that
+ * could fit.
  * *** This is generally NOT the case in most programming languages!!! ***
  */
 public enum Token {
-  
+
     WRITE("write"),
     READ("read"),
     ELSE("else"),
@@ -34,8 +41,8 @@ public enum Token {
     ASSIGNMENT(":="),
     ADD_OP("+", "-"),
     MULT_OP("*", "/"),
-    RELATION("<",">","<=",">=", "=", "!="),
-    // THESE ARE NOT USED IN THE GRAMMAR, BUT MIGHT BE USEFUL...  :)
+    RELATION("<", ">", "<=", ">=", "=", "!="),
+    // THESE ARE NOT USED IN THE GRAMMAR, BUT MIGHT BE USEFUL... :)
     $$, // End of file
     UNKNOWN, // Could be "ID" in a "real programming language"
     NUMBER; // A sequence of digits.
