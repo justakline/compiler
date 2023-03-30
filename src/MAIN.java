@@ -47,6 +47,7 @@ public class MAIN {
 
     public static void main(String[] args) {
         // Check for an input file argument
+        System.out.println("here");
         if (args.length != 1) {
             System.err.println("Must Provide an input filename!!");
             System.exit(1);
