@@ -93,18 +93,23 @@ public class Parser {
         }
     }
     
-  //######## Confused ############
-    //###############################
+
     //How do I know when to do the recursive call or the empty??
     // <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY> 
     private void STMT_LIST(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-
-
         this.STMT(thisNode);
 
-
-        if (lexer.currentToken() == Token.STMT) {
+        //These are the FIRST(STMT_LIST)
+        List <Token> stmtFirstList = new List<>(){{
+            add(Token.UNKNOWN);
+            add(Token.READ);
+            add(Token.WRITE);
+            add(Token.WHILE);
+            add(Token.DO);
+            add(Token.IF);
+        }};
+        if (stmtFirstList.contains(lexer.currentToken())) {
             this.MATCH(thisNode,Token.STMT_LIST);
         }else{
             this.EMPTY(thisNode);
@@ -141,8 +146,7 @@ public class Parser {
         this.TERM_TAIL(thisNode);
     }
 
-     //######## Confused ############
-    //###############################
+     
 
     // <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY>  
     private void TERM_TAIL(final TreeNode parentNode) throws ParseException {
@@ -150,16 +154,15 @@ public class Parser {
             this.MATCH(thisNode, Token.ADD_OP);
             this.TERM(thisNode);
 
-
-        // if(lexer.currentToken() == Token.ADD_OP){
-        //     this.TERM_TAIL(thisNode);
-        // }else{
-        //     this.EMPTY(thisNode);
-        // }
+    //recursive or empty
+        if(lexer.currentToken() == Token.ADD_OP){
+            this.TERM_TAIL(thisNode);
+        }else{
+            this.EMPTY(thisNode);
+        }
     }
 
     // <TERM> ::= <FACTOR> <FACTOR_TAIL>
-   
     private void TERM(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
         this.FACTOR(thisNode);
@@ -167,25 +170,25 @@ public class Parser {
     }
 
 
- //######## Confused ############
-    //###############################
+
     // <FACTOR_TAIL> ::= <MULT_OP> <FACTOR> <FACTOR_TAIL> | <EMPTY> 
-    
     private void FACTOR_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
             this.MATCH(thisNode, Token.MULT_OP);
             this.FACTOR(thisNode);
-        // if(lexer.currentToken() == Token.MULT_OP){
-        //     this.MATCH(thisNode, Token.FACTOR_TAIL);
-        // }else{
-        //     this.EMPTY(thisNode);
-        // }
+
+        //Recursive or empty
+        if(lexer.currentToken() == Token.MULT_OP){
+            this.MATCH(thisNode, Token.FACTOR_TAIL);
+        }else{
+            this.EMPTY(thisNode);
+        }
     }
 
 
 
     // <FACTOR> ::= ( <EXPR> ) | <ID> | <NUMBER> 
-    private void TERM(final TreeNode parentNode) throws ParseException {
+    private void FACTOR(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
   
         if(lexer.currentToken() == Token.LEFTP){
