@@ -1,5 +1,12 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
+/*
+COURSE: COSC455003
+Assignment: Program 1
+
+ 
+Name: Kline, Justin
+*/
 
 import java.util.logging.Logger;
 import java.util.ArrayList;
@@ -87,7 +94,6 @@ public class Parser {
     }
 
     // <PROGRAM> ::= <STMT_LIST> $$
-
     private void PROGRAM(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
         this.STMT_LIST(thisNode);
@@ -97,7 +103,6 @@ public class Parser {
         }
     }
 
-    // How do I know when to do the recursive call or the empty??
     // <STMT_LIST> ::= <STMT> <STMT_LIST> | <EMPTY>
     private void STMT_LIST(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
@@ -231,8 +236,6 @@ public class Parser {
         this.MATCH(thisNode, Token.UNTIL);
         this.CONDITION(thisNode);
     }
-
-    // <IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <ELSE> <STMT_lIST> <FI>
 
     // <IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <IF_TAIL>
     private void IF_STMT(final TreeNode parentNode) throws ParseException {

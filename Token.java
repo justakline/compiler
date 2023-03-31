@@ -1,28 +1,17 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
+/*
+COURSE: COSC455003
+Assignment: Program 1
+
+ 
+Name: Kline, Justin
+*/
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Remember this is part of a "fake" tokenizer, that when handed a string, it
- * simply resolves to a
- * TOKEN object matching that string. All the Tokens/Terminals Used by the
- * parser. The purpose of
- * the enum type here is to eliminate the need for direct character comparisons.
- * <p>
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IMPORTANT
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<br>
- * -----------------------------------------------------------------------------<br>
- * IN *MOST* REAL CASES, THERE WILL BE ONLY ONE LEXEME PER compiler Token!
- * <p>
- * The fact that several lexemes exist per token in this example is because this
- * is to parse simple
- * In English sentences, most of the token types have many words (lexemes) that
- * could fit.
- * *** This is generally NOT the case in most programming languages!!! ***
- */
 public enum Token {
 
     WRITE("write"),

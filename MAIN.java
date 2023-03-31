@@ -1,5 +1,14 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
+
 package compiler;
+
+/*
+COURSE: COSC455003
+Assignment: Program 1
+
+ 
+Name: Kline, Justin
+*/
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,6 +59,7 @@ public class MAIN {
 
     public static void main(String[] args) {
         // Check for an input file argument
+
         if (args.length != 1) {
             System.err.println("Must Provide an input filename!!");
             System.exit(1);
