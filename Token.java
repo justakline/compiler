@@ -1,8 +1,6 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
 
-import compiler.src.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +28,7 @@ public enum Token {
     WRITE("write"),
     READ("read"),
     ELSE("else"),
+    THEN("then"),
     FI("fi"),
     IF("if"),
     UNTIL("until"),

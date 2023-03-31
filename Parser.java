@@ -1,9 +1,9 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
 
-import compiler.src.*;
-
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
     <PROGRAM> ::= <STMT_LIST> $$   
@@ -83,7 +83,7 @@ public class Parser {
     private void beginParsing(final TreeNode parentNode) throws ParseException {
         // Invoke the start rule.
         // TODO: Change if necessary!
-        this.SENTENCE(parentNode);
+        this.PROGRAM(parentNode);
     }
 
     // <PROGRAM> ::= <STMT_LIST> $$
@@ -104,7 +104,7 @@ public class Parser {
         this.STMT(thisNode);
 
         // These are the FIRST(STMT_LIST)
-        List<Token> stmtFirstList = new List<>() {
+        List<Token> stmtFirstList = new ArrayList<Token>() {
             {
                 add(Token.UNKNOWN);
                 add(Token.READ);
@@ -115,7 +115,7 @@ public class Parser {
             }
         };
         if (stmtFirstList.contains(lexer.currentToken())) {
-            this.MATCH(thisNode, Token.STMT_LIST);
+            this.STMT_LIST(parentNode);
         } else {
             this.EMPTY(thisNode);
         }
@@ -155,11 +155,11 @@ public class Parser {
     // <TERM_TAIL> ::= <ADD_OP> <TERM> <TERM_TAIL> | <EMPTY>
     private void TERM_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        this.MATCH(thisNode, Token.ADD_OP);
-        this.TERM(thisNode);
 
-        // recursive or empty
         if (lexer.currentToken() == Token.ADD_OP) {
+            this.MATCH(thisNode, Token.ADD_OP);
+            this.TERM(thisNode);
+            // recursive or empty
             this.TERM_TAIL(thisNode);
         } else {
             this.EMPTY(thisNode);
@@ -176,12 +176,12 @@ public class Parser {
     // <FACTOR_TAIL> ::= <MULT_OP> <FACTOR> <FACTOR_TAIL> | <EMPTY>
     private void FACTOR_TAIL(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
-        this.MATCH(thisNode, Token.MULT_OP);
-        this.FACTOR(thisNode);
-
-        // Recursive or empty
         if (lexer.currentToken() == Token.MULT_OP) {
-            this.MATCH(thisNode, Token.FACTOR_TAIL);
+            this.MATCH(thisNode, Token.MULT_OP);
+            this.FACTOR(thisNode);
+            // Recursive or empty -> Find First(FACTOR_TAIL)
+            this.FACTOR_TAIL(parentNode);
+
         } else {
             this.EMPTY(thisNode);
         }
@@ -211,7 +211,7 @@ public class Parser {
         this.EXPR(thisNode);
     }
 
-    // <WHILE_STATEMENT> ::= <WHILE> <CONDITION> <DO> <STMT_LIST <OD>
+    // <WHILE_STATEMENT> ::= <WHILE> <CONDITION> <DO> <STMT_LIST> <OD>
     private void WHILE_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
@@ -233,6 +233,8 @@ public class Parser {
     }
 
     // <IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <ELSE> <STMT_lIST> <FI>
+
+    // <IF_STMT> ::= <IF> <CONDITION> <THEN> <STMT_LIST> <IF_TAIL>
     private void IF_STMT(final TreeNode parentNode) throws ParseException {
         final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
 
@@ -240,8 +242,18 @@ public class Parser {
         this.CONDITION(thisNode);
         this.MATCH(thisNode, Token.THEN);
         this.STMT_LIST(thisNode);
-        this.MATCH(thisNode, Token.ELSE);
-        this.STMT_LIST(thisNode);
+        this.IF_TAIL(thisNode);
+
+    }
+
+    // <IF_TAIL> ::= <ELSE> <STMT_LIST> <FI> | <FI>
+    private void IF_TAIL(final TreeNode parentNode) throws ParseException {
+        final TreeNode thisNode = codeGenerator.addNonTerminalToTree(parentNode);
+        if (lexer.currentToken() == Token.ELSE) {
+            this.MATCH(thisNode, Token.ELSE);
+            this.STMT_LIST(thisNode);
+        }
+
         this.MATCH(thisNode, Token.FI);
 
     }
@@ -273,6 +285,7 @@ public class Parser {
         if (currentToken == expectedToken) {
             var currentLexeme = lexer.getCurrentLexeme();
             this.addTerminalToTree(parentNode, currentToken, currentLexeme);
+
             lexer.advanceToken();
         } else {
             this.raiseException(expectedToken, parentNode);

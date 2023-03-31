@@ -1,8 +1,6 @@
 //  ************** REQUIRES JAVA 17 OR ABOVE! (https://adoptium.net/) ************** //
 package compiler;
 
-import compiler.Token;
-import compiler.src.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -50,9 +48,8 @@ public class MAIN {
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         // Check for an input file argument
-        System.out.println("here");
         if (args.length != 1) {
             System.err.println("Must Provide an input filename!!");
             System.exit(1);
@@ -170,6 +167,7 @@ class LexicalAnalyzer {
      * @return the current token.
      */
     public Token currentToken() {
+
         return this.tokenList.isEmpty() ? Token.$$ : this.tokenList.peek().token;
     }
 
@@ -177,6 +175,7 @@ class LexicalAnalyzer {
      * Advance to next token, making it current.
      */
     public void advanceToken() {
+
         if (!this.tokenList.isEmpty()) {
             this.tokenList.remove();
         }
